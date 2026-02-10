@@ -14,9 +14,9 @@ export const saveToCache = async <T>(key: string, data: T): Promise<void> => {
       timestamp: Date.now(),
     };
     await AsyncStorage.setItem(key, JSON.stringify(cacheItem));
-    console.log('[v0] Saved to cache:', key);
+    console.log('Saved to cache:', key);
   } catch (error) {
-    console.log('[v0] Error saving to cache:', error);
+    console.log('Error saving to cache:', error);
   }
 };
 
@@ -32,15 +32,15 @@ export const getFromCache = async <T>(key: string): Promise<T | null> => {
     const age = Date.now() - cacheItem.timestamp;
 
     if (age > CACHE_EXPIRY_MS) {
-      console.log('[v0] Cache expired for:', key);
+      console.log('Cache expired for:', key);
       await AsyncStorage.removeItem(key);
       return null;
     }
 
-    console.log('[v0] Retrieved from cache:', key);
+    console.log('Retrieved from cache:', key);
     return cacheItem.data;
   } catch (error) {
-    console.log('[v0] Error retrieving from cache:', error);
+    console.log('Error retrieving from cache:', error);
     return null;
   }
 };
@@ -48,17 +48,17 @@ export const getFromCache = async <T>(key: string): Promise<T | null> => {
 export const clearCache = async (): Promise<void> => {
   try {
     await AsyncStorage.clear();
-    console.log('[v0] Cache cleared');
+    console.log('Cache cleared');
   } catch (error) {
-    console.log('[v0] Error clearing cache:', error);
+    console.log('Error clearing cache:', error);
   }
 };
 
 export const removeCacheItem = async (key: string): Promise<void> => {
   try {
     await AsyncStorage.removeItem(key);
-    console.log('[v0] Cache item removed:', key);
+    console.log('Cache item removed:', key);
   } catch (error) {
-    console.log('[v0] Error removing cache item:', error);
+    console.log('Error removing cache item:', error);
   }
 };

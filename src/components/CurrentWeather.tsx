@@ -190,7 +190,7 @@ const InfoRow: React.FC<InfoRowProps> = ({ icon, label, value }) => (
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.card,
     paddingHorizontal: 16,
   },
   locationHeader: {
@@ -248,10 +248,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 0.8 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 3,
   },
   temperatureSection: {
     flexDirection: 'row',

@@ -46,10 +46,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 
   const handleSelectSuggestion = useCallback(
-    (city: string) => {
-      setQuery(city);
+    (item: (typeof suggestions)[0]) => {
+      const displayQuery = item.name;
+      const searchParam = `${item.name}${
+        item.region ? `, ${item.region}` : ''
+      }${item.country ? `, ${item.country}` : ''}`;
+      setQuery(displayQuery);
       setShowSuggestions(false);
-      onSearch(city);
+      onSearch(searchParam);
     },
     [onSearch],
   );
@@ -64,7 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const renderSuggestion = ({ item }: { item: (typeof suggestions)[0] }) => (
     <TouchableOpacity
       style={styles.suggestionItem}
-      onPress={() => handleSelectSuggestion(item.name)}
+      onPress={() => handleSelectSuggestion(item)}
       activeOpacity={0.7}
     >
       <View style={styles.suggestionIconContainer}>
@@ -75,7 +79,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         />
       </View>
       <View style={styles.suggestionContent}>
-        <Text style={styles.suggestionText}>
+        <Text
+          style={styles.suggestionText}
+          numberOfLines={1}
+          lineBreakMode="tail"
+        >
           {item.name}
           {item.region && `, ${item.region}`}
         </Text>
@@ -115,7 +123,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
           }}
           onBlur={() => {
             setIsFocused(false);
-            setTimeout(() => setShowSuggestions(false), 200);
+            // Increased timeout to ensure onPress fires before list disappears
+            setTimeout(() => setShowSuggestions(false), 300);
           }}
           onSubmitEditing={handleSearch}
           returnKeyType="search"
@@ -172,8 +181,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
               }
               renderItem={renderSuggestion}
               keyExtractor={(item, index) => `${item.name}-${index}`}
-              scrollEnabled={false}
-              nestedScrollEnabled={false}
+              scrollEnabled={true}
+              nestedScrollEnabled={true}
+              keyboardShouldPersistTaps="handled"
               ItemSeparatorComponent={() => <View style={styles.separator} />}
             />
           </View>
@@ -184,7 +194,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    // marginBottom: 20,
     marginTop: 12,
     marginHorizontal: 16,
     zIndex: 1000,
@@ -237,6 +247,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   suggestionsList: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
     backgroundColor: COLORS.card,
     borderRadius: 16,
     marginTop: 8,
@@ -246,7 +260,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 5,
-    overflow: 'hidden',
+    zIndex: 1000,
   },
   recentHeader: {
     flexDirection: 'row',

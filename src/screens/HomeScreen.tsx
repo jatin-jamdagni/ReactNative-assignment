@@ -89,13 +89,25 @@ const HomeScreen = ({ navigation }: any) => {
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'ios') {
-      return true;
+      try {
+        Geolocation.requestAuthorization();
+        return true;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
     }
     try {
-      const granted = await PermissionsAndroid.request(
+      const granted = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+      ]);
+      return (
+        granted['android.permission.ACCESS_FINE_LOCATION'] ===
+          PermissionsAndroid.RESULTS.GRANTED ||
+        granted['android.permission.ACCESS_COARSE_LOCATION'] ===
+          PermissionsAndroid.RESULTS.GRANTED
       );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
       console.warn(err);
       return false;
@@ -130,7 +142,7 @@ const HomeScreen = ({ navigation }: any) => {
           console.log('Geolocation error:', error);
           handleSearch('Delhi');
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 10000 },
       );
     } catch (error) {
       console.log('Geolocation error:', error);
@@ -153,7 +165,7 @@ const HomeScreen = ({ navigation }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <View style={styles.header}>
@@ -177,9 +189,17 @@ const HomeScreen = ({ navigation }: any) => {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.searchBarContainer}>
+        <SearchBar
+          onSearch={handleSearch}
+          onCurrentLocation={getCurrentLocationWeather}
+        />
+      </View>
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -190,11 +210,6 @@ const HomeScreen = ({ navigation }: any) => {
         }
         showsVerticalScrollIndicator={false}
       >
-        <SearchBar
-          onSearch={handleSearch}
-          onCurrentLocation={getCurrentLocationWeather}
-        />
-
         {isLoading && !current && <LoadingSpinner />}
 
         {error && !current && (
@@ -251,6 +266,13 @@ const HomeScreen = ({ navigation }: any) => {
           </View>
         )}
       </ScrollView>
+
+      {/* Global Loading Overlay for search/refresh when data exists */}
+      {isLoading && current && !refreshing && (
+        <View style={styles.globalLoadingOverlay}>
+          <LoadingSpinner message="Updating weather data..." />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -258,7 +280,13 @@ const HomeScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.card,
+    zIndex: 1,
+  },
+  searchBarContainer: {
+    zIndex: 100,
+    paddingBottom: 8,
+    backgroundColor: COLORS.card,
   },
   header: {
     flexDirection: 'row',
@@ -308,6 +336,7 @@ const styles = StyleSheet.create({
 
   scrollView: {
     flex: 1,
+    paddingVertical: 16,
   },
   scrollContent: {
     paddingBottom: 32,
@@ -371,6 +400,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginLeft: 8,
     letterSpacing: 0.5,
+  },
+  globalLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    zIndex: 2000,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

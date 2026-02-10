@@ -287,7 +287,7 @@ const DetailRow: React.FC<DetailRowProps> = ({ icon, label, value, color }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.card,
   },
   header: {
     backgroundColor: COLORS.card,
